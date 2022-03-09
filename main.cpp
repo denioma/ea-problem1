@@ -4,10 +4,12 @@
 #include <map>
 #include <sstream>
 
-typedef std::array<std::vector<int>, 4> piece;
+typedef std::vector<int> piece;
+typedef std::array<piece, 4> rotations;
+typedef std::pair<int, int> index;
 
 std::array<std::array<std::pair<int, int>, 50>, 50> board;
-std::map<int, piece> pieces;
+std::map<int, rotations> pieces;
 std::vector<bool> used = {false};
 int n, r, c;
 int currRow, currCol;
@@ -19,20 +21,39 @@ std::vector<int> rotate(std::vector<int> vec) {
 }
 
 bool match() {
-    if (currRow == 0) {
-        // Only match to the left
-        auto index = board[0][currCol-1];
-        auto leftPiece = pieces[index.first][index.second];
-        int a = leftPiece[1], b = leftPiece[2];
-        for (auto& piece : pieces) {
-            if (used[piece.first]) continue;
-            for (int i = 0; i < 4; i++) {
-                int c = piece.second[i][0], d = piece.second[i][3];
-                if (a == c && b == d) { // Found match
-                    used[piece.first] = true;
-                    board[currRow][currCol] = {piece.first, i};
-                    return true;
-                }
+    index idx;
+    piece leftPiece, topPiece;
+    int a = -1, b = -1, c = -1, d = -1;
+    if (currCol != 0) {
+        idx = board[currRow][currCol - 1];
+        leftPiece = pieces[idx.first][idx.second];
+        a = leftPiece[1];
+        b = leftPiece[2];
+    }
+    if (currRow != 0) {
+        idx = board[currRow - 1][currCol];
+        topPiece = pieces[idx.first][idx.second];
+        c = topPiece[2];
+        d = topPiece[3];
+    }
+
+    for (auto& piece : pieces) {
+        if (used[piece.first]) continue;
+        for (int i = 0; i < 4; i++) {
+            auto current = piece.second[i];
+            bool isMatch = false;
+            if (currCol != 0) { // Match to the left
+                if (a == current[0] && b == current[3])
+                    isMatch = true;
+            }
+            if (currRow != 0) { // Match up
+                if (d == current[0] && c == current[1])
+                    isMatch = true;
+            }
+            if (isMatch) {
+                used[piece.first] = true;
+                board[currRow][currCol] = {piece.first, i};
+                return true;
             }
         }
     }
@@ -40,7 +61,6 @@ bool match() {
 }
 
 bool solve() {
-    if (r != 1) return false;
     if (currRow == r) return true;
     else if (currCol == c) {
         currRow++;
@@ -83,7 +103,7 @@ int main() {
         // Get number of pieces and board size from cin
         std::cin >> n >> r >> c;
         for (int j = 0; j < n; j++) {
-            piece p;
+            rotations p;
             // Get pieces from cin
             std::cin >> p1 >> p2 >> p3 >> p4;
 
@@ -99,12 +119,10 @@ int main() {
         used[0] = true;
         board[0][0] = {0,0};
         currRow = 0; currCol = 1;
-        if (r > 1) {
-            std::cout << "r > 1: Not yet implemented!\n";
-        } else if (solve()) {
+        if (solve()) {
             printBoard();
         } else {
-            std::cout << "Impossible\n";
+            std::cout << "Impossible:\n";
         }
     }
 
