@@ -24,41 +24,35 @@ std::vector<int> rotate(std::vector<int> vec) {
     return vec;
 }
 
-bool solve() {
-    if (currRow <= 0 && currCol == 0) {
-        // Backtracked too far, puzzle is impossible
-        return false;
-    }
-
-    if (currCol == c) {
-        currRow++;
-        currCol = 0;
-    }
-
-    if (currRow == r) {
-        // Solution was found
+bool backtrack(int& x, int&y, int id) {
+    auto& vec = history[x][y];
+    auto it = std::find(vec.begin(), vec.end(), id);
+    if (it != vec.end()) {
+        used[*it] = false;
         return true;
     }
+    return false;
+}
 
+bool match() {
     index idx;
     piece leftPiece, topPiece;
-    int a = -1, b = -1, c1 = -1, d = -1;
-    if (currCol != 0) { // Match left
+    int a = -1, b = -1, c = -1, d = -1;
+    if (currCol != 0) {
         idx = board[currRow][currCol - 1];
         leftPiece = pieces[idx.first][idx.second];
         a = leftPiece[1];
         b = leftPiece[2];
     }
-
-    if (currRow != 0) { // Match up
+    if (currRow != 0) {
         idx = board[currRow - 1][currCol];
         topPiece = pieces[idx.first][idx.second];
-        c1 = topPiece[2];
+        c = topPiece[2];
         d = topPiece[3];
     }
 
     for (auto& piece : pieces) {
-        if (used[piece.first])
+        if (used[piece.first] || backtrack(currRow, currCol, piece.first))
             continue;
         for (int i = 0; i < 4; i++) {
             auto current = piece.second[i];
@@ -68,27 +62,29 @@ bool solve() {
                     isMatch = true;
             }
             if (currRow != 0) { // Match up
-                if (d == current[0] && c1 == current[1])
+                if (d == current[0] && c == current[1])
                     isMatch = true;
             }
             if (isMatch) {
                 used[piece.first] = true;
                 board[currRow][currCol] = {piece.first, i};
-                // history[currRow][currCol].push_back(piece.first);
-                currCol++;
-                if (solve()) return true;
-                currCol--;
-                board[currRow][currCol] = {-1, -1};
-                used[piece.first] = false;
+                history[currRow][currCol].push_back(piece.first);
+                return true;
             }
         }
     }
+}
 
-    // Backtracking point
-    currCol--;
-    if (currCol < 0) {
-        currRow--;
-        currCol = c - 1;
+bool solve() {
+    if (currRow == r) return true;
+    else if (currCol == c) {
+        currRow++;
+        currCol = 0;
+    } else {
+        if (!match()) {
+            return false;
+        }
+        currCol++;
     }
     return solve();
 }
@@ -121,7 +117,6 @@ int main() {
     int p1, p2, p3, p4;
     for (int i = 0; i < nTestcases; i++) {
         pieces.clear();
-        used.clear();
         // Get number of pieces and board size from cin
         std::cin >> n >> r >> c;
         for (int j = 0; j < n; j++) {
@@ -136,7 +131,6 @@ int main() {
                 p[3] = rotate(p[2]);
             }
             pieces.insert({j, p});
-            used[j] = false;
         }
 
         used[0] = true;
