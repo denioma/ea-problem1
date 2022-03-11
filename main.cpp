@@ -141,7 +141,7 @@ int main() {
         if (solve()) {
             printBoard();
         } else {
-            std::cout << "Impossible\n";
+            std::cout << "impossible puzzle!\n";
         }
     }
 
