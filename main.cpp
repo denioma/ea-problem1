@@ -31,7 +31,8 @@ void printBoard() {
         }
         std::string top = topss.str(), bot = botss.str();
         std::cout << top.substr(0, top.size() - 2) << "\n"
-                  << bot.substr(0, bot.size() - 2) << "\n\n";
+                  << bot.substr(0, bot.size() - 2) << "\n";
+        if (i != r - 1) std::cout << "\n";
     }
 }
 
@@ -60,20 +61,19 @@ bool solve() {
         uright = piece[2];
     }
 
-
+    // TODO Improvement: check if lup, ldown, uleft and uright are on the piece, else skip
     for (int i = 1; i < n; i++) { // Start from the second piece onwards
         if (used[i]) continue; // Skip piece if already on the board
         for (int j = 0; j < 4; j++) { // Check all rotations
             piece& current = pieces[i][j];
+            bool matchedLeft = (current[0] == lup && current[3] == ldown) ? true : false;
+            bool matchedUp = (current[0] == uleft && current[1] == uright) ? true : false;
             bool matched = false;
 
-            if (currCol > 0) { // Match left
-                matched = (current[0] == lup && current[3] == ldown) ? true : false;
-            }
-
-            if (currRow > 0) { // Match up
-                matched = (current[0] == uleft && current[1] == uright) ? true : false;
-            }
+            if (currCol > 0) {
+                if (currRow > 0) matched = matchedLeft && matchedUp;
+                else matched = matchedLeft;
+            } else if (currRow > 0) matched = matchedUp;
 
             if (matched) {
                 used[i] = true;
@@ -82,7 +82,6 @@ bool solve() {
                 if (solve()) {
                     return true;
                 }
-                currCol--;
                 used[i] = false;
                 break; // No point in checking other rotations of the same piece
             }
@@ -92,7 +91,7 @@ bool solve() {
     currCol--;
     if (currCol < 0) {
         if (currRow > 0) currRow--;
-        currCol = 0;
+        currCol = c - 1;
     }
     return false;
 }
@@ -114,7 +113,7 @@ int main() {
             p[1] = rotate(p[0]);
             p[2] = rotate(p[1]);
             p[3] = rotate(p[2]);
-            used[i] = i == 0 ? true : false; // Mark only the first piece as used
+            used[j] = (j == 0) ? true : false; // Mark only the first piece as used
             pieces.push_back(p);
         }
         board[0][0] = {0, 0};
