@@ -3,16 +3,12 @@
 #include <array>
 #include <map>
 #include <sstream>
-#include <algorithm>
 
 typedef std::vector<int> piece;
 typedef std::array<piece, 4> rotations;
 typedef std::pair<int, int> index;
 
-std::map<index, std::vector<index>> blacklist;
-
 std::array<std::array<std::pair<int, int>, 50>, 50> board;
-std::array<std::array<std::vector<int>, 50>, 50> history;
 std::map<int, rotations> pieces;
 std::vector<bool> used = {false};
 int n, r, c;
