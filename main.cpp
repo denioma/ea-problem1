@@ -19,7 +19,6 @@ std::array<bool, 2500> used;
 std::array<std::array<index, 50>, 50> board;
 
 int n, r, c;
-int currRow, currCol;
 
 inline
 std::vector<int> rotate(std::vector<int> vec) {
@@ -28,7 +27,7 @@ std::vector<int> rotate(std::vector<int> vec) {
   return vec;
 }
 
-void process() {
+bool process() {
     for (int i = 0; i < n; i++) {
         std::vector<int> possibleSet;
         auto& piece = pieces[i];
@@ -48,6 +47,8 @@ void process() {
             }
         }
 
+        if (possibleSet.size() == 0) return false;
+
         // From possible pieces set, find those that can be placed on the right and down
         for (const auto& idx : possibleSet) {
             auto& possiblePiece = pieces[idx];
@@ -66,6 +67,7 @@ void process() {
             }
         }
     }
+    return true;
 }
 
 void printBoard() {
@@ -152,10 +154,11 @@ int main() {
             used[j] = (j == 0) ? true : false; // Mark only the first piece as used
             pieces.push_back(p);
         }
-        process();
+        if (!process()) {
+            std::cout << "impossible puzzle!\n";
+            return 0;
+        }
         board[0][0] = {0, 0};
-        currRow = 0;
-        currCol = 1;
         if (solve(0, 1)) {
             printBoard();
         } else {
