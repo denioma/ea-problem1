@@ -4,7 +4,8 @@
 #include <vector>
 #include <sstream>
 
-typedef std::pair<int, int> index;
+// typedef std::pair<int, int> index;
+typedef std::array<int, 2> index;
 typedef struct _rotation {
     std::vector<int> rotation;
     std::vector<index> right;
@@ -81,7 +82,7 @@ void printBoard() {
         std::stringstream topss, botss;
         for (int j = 0; j < c; j++) {
             auto& idx = board[i][j];
-            auto& rotation = pieces[idx.first][idx.second].rotation;
+            auto& rotation = pieces[idx[0]][idx[1]].rotation;
             topss << rotation[0] << " " << rotation[1] << "  ";
             botss << rotation[3] << " " << rotation[2] << "  ";
         }
@@ -108,26 +109,26 @@ bool solve(int row, int col) {
         if (row > 0) {
             auto& lidx = board[row][col - 1];
             auto& uidx = board[row - 1][col];
-            auto& left = pieces[lidx.first][lidx.second].right;
-            auto& up = pieces[uidx.first][uidx.second].down;
+            auto& left = pieces[lidx[0]][lidx[1]].right;
+            auto& up = pieces[uidx[0]][uidx[1]].down;
             std::set_intersection(left.begin(), left.end(), up.begin(), up.end(), std::back_inserter(possible));
         } else {
             auto& idx = board[row][col - 1];
-            possible = pieces[idx.first][idx.second].right;
+            possible = pieces[idx[0]][idx[1]].right;
         }
     } else if (row > 0) {
         auto& idx = board[row - 1][col];
-        possible = pieces[idx.first][idx.second].down;
+        possible = pieces[idx[0]][idx[1]].down;
     }
 
     for (const auto& idx : possible) {
-        if (used[idx.first]) continue; // Skip piece if already on the board
-        used[idx.first] = true;
+        if (used[idx[0]]) continue; // Skip piece if already on the board
+        used[idx[0]] = true;
         board[row][col] = idx;
         if (solve(row, col+1)) {
             return true;
         }
-        used[idx.first] = false;
+        used[idx[0]] = false;
     }
 
     col--;
