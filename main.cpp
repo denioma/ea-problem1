@@ -13,7 +13,7 @@ typedef struct _rotation {
 
 typedef std::array<rotation, 4> piece;
 
-// std::vector<rotations> pieces;
+std::array<int, 999> colors {};
 std::vector<piece> pieces;
 std::array<bool, 2500> used;
 std::array<std::array<index, 50>, 50> board;
@@ -28,6 +28,12 @@ std::vector<int> rotate(std::vector<int> vec) {
 }
 
 bool process() {
+    int odds = 0;
+    for (const auto& count : colors) {
+        if (count % 2 != 0) odds++;
+        if (odds > 4) return false;
+    }
+
     for (int i = 0; i < n; i++) {
         std::vector<int> possibleSet;
         auto& piece = pieces[i];
@@ -143,10 +149,15 @@ int main() {
     for (int i = 0; i < testcases; i++) {
         pieces.clear();
         std::cin >> n >> r >> c;
+        for (auto& count : colors) count = 0;
         for (int j = 0; j < n; j++) {
             int p1, p2, p3, p4;
-            std::cin >> p1 >> p2 >> p3 >> p4;
             piece p;
+            std::cin >> p1 >> p2 >> p3 >> p4;
+            colors[p1-1]++;
+            colors[p2-1]++;
+            colors[p3-1]++;
+            colors[p4-1]++;
             p[0].rotation = { p1, p2, p3, p4 };
             p[1].rotation = rotate(p[0].rotation);
             p[2].rotation = rotate(p[1].rotation);
@@ -156,13 +167,13 @@ int main() {
         }
         if (!process()) {
             std::cout << "impossible puzzle!\n";
-            return 0;
-        }
-        board[0][0] = {0, 0};
-        if (solve(0, 1)) {
-            printBoard();
         } else {
-            std::cout << "impossible puzzle!\n";
+            board[0][0] = {0, 0};
+            if (solve(0, 1)) {
+                printBoard();
+            } else {
+                std::cout << "impossible puzzle!\n";
+            }
         }
     }
     return 0;
