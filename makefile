@@ -1,5 +1,5 @@
 cc = g++
-cflags = -Wall -Wextra -std=c++17 -O2 -lm -g -pg
+cflags = -Wall -Wextra -std=c++17 -O2 -lm -g
 src = main.cpp
 out = main
 

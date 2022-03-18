@@ -103,7 +103,8 @@ bool solve(int row, int col) {
         return true;
     }
 
-    std::vector<index> possible;
+    std::vector<index> tmp;
+    std::vector<index> *possible = nullptr;
 
     if (col > 0) {
         if (row > 0) {
@@ -111,24 +112,27 @@ bool solve(int row, int col) {
             auto& uidx = board[row - 1][col];
             auto& left = pieces[lidx[0]][lidx[1]].right;
             auto& up = pieces[uidx[0]][uidx[1]].down;
-            std::set_intersection(left.begin(), left.end(), up.begin(), up.end(), std::back_inserter(possible));
+            std::set_intersection(left.begin(), left.end(), up.begin(), up.end(), std::back_inserter(tmp));
+            possible = &tmp;
         } else {
             auto& idx = board[row][col - 1];
-            possible = pieces[idx[0]][idx[1]].right;
+            possible = &pieces[idx[0]][idx[1]].right;
         }
     } else if (row > 0) {
         auto& idx = board[row - 1][col];
-        possible = pieces[idx[0]][idx[1]].down;
+        possible = &pieces[idx[0]][idx[1]].down;
     }
 
-    for (const auto& idx : possible) {
-        if (used[idx[0]]) continue; // Skip piece if already on the board
-        used[idx[0]] = true;
-        board[row][col] = idx;
-        if (solve(row, col+1)) {
-            return true;
+    if (possible) {
+        for (const auto& idx : *possible) {
+            if (used[idx[0]]) continue; // Skip piece if already on the board
+            used[idx[0]] = true;
+            board[row][col] = idx;
+            if (solve(row, col+1)) {
+                return true;
+            }
+            used[idx[0]] = false;
         }
-        used[idx[0]] = false;
     }
 
     col--;
